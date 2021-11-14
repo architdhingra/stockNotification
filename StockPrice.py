@@ -9,5 +9,12 @@ def getCurrentPrice(stock="AAPL"):
     print(stockPrice)
 
 
+def getAllStocks():
+    resp = requests.get("https://yfapi.net/v6/finance/quote?region=US&lang=en",
+                        headers={"x-api-key": "Ol3iLb65Ld7N5nAEyq6CW9DBGsOjL2dt4WuLm1sl"})
+    stocks = resp.json()["quoteResponse"]["result"]
+    print(stocks)
+
+
 if __name__ == '__main__':
     getCurrentPrice()
