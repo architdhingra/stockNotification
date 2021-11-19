@@ -66,6 +66,7 @@ def getAllStocks():
             cursor.execute("update stocks set timestamp = %s where id = %s", (now, id))
             if cutOffLow <= stockDict[userStockName] or cutOffHigh >= stockDict[userStockName]:
                 sendEmail(cutOffLow, cutOffHigh, userStockName, stockDict[userStockName], result[0])
+            conn.commit()
 
 
 getAllStocks()
