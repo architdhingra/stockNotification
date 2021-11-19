@@ -1,3 +1,4 @@
+import datetime
 from os.path import join, dirname
 
 import requests
@@ -71,8 +72,8 @@ def register():
 
         for i, j in enumerate(stockNames):
             print(id, stockNames[i], stockBuyPrices[i], cutOffLow[i], cutOffHigh[i])
-            cursor.execute("insert into stock values (%s, %s, %s, %s, %s);",
-                           (id, stockNames[i], stockBuyPrices[i], cutOffLow[i], cutOffHigh[i]))
+            cursor.execute("insert into stock values (%s, %s, %s, %s, %s, %s);",
+                           (username, stockNames[i], stockBuyPrices[i], cutOffLow[i], cutOffHigh[i], datetime.now()))
         conn.commit()
         return Response(status=201, mimetype='application/json')
     except Exception as e:
