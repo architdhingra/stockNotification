@@ -1,47 +1,68 @@
 <html>
-    <head>
-        <title> Login & Registration </title>
-        <link rel = "stylesheet" href="style.css">
-    </head>
-    <body>
-        <div class="firstdiv">
-            <div class="form-box">
-                <div class="button-box">
-                    <div id="btn"></div>
-                    <button type="button" class ="toggle-button" onclick="login()">Login</button>
-                    <button type="button" class ="toggle-button" onclick="register()">Register</button>
-                </div>
-                <form id="login" class="input-group">
-                    <input id="login-email" type="text" class="input-field" placeholder="Enter Your Email ID!" required>
-                    <input id="login-password" type="text" class="input-field" placeholder="Password" required>
-                    <button id="login-button" type="submit" class="submit-button">Login</button>
-                </form>
-                <form id="register" class="input-group">
-                    <input id="registration-email" type="text" class="input-field" placeholder="Enter Your Email ID!" required>
-                    <input id="registration-stockname" type="text" class="input-field" placeholder="Enter the stock you want to track" required>
-                    <input id="registration-stockvalue" type="text" class="input-field" placeholder="Enter your target stock value" required>
-                    <input id="registration-password" type="text" class="input-field" placeholder="Password" required>
-                    <button id="registration-button" type="submit" class="submit-button">Register</button>
-                </form>
-            </div>
+<head>
+    <title> Login & Registration </title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+
+</head>
+<body>
+<div class="firstdiv">
+    <div class="form-box">
+        <div class="button-box">
+            <div id="btn"></div>
+            <button type="button" class="toggle-button" onclick="login()">Login</button>
+            <button type="button" class="toggle-button" onclick="register()">Register</button>
         </div>
+        <form id="login" class="input-group">
+            <input id="username" name="username" type="text" class="input-field" placeholder="Enter Your Email ID!"
+                   required>
+            <input id="password" name="password" type="text" class="input-field" placeholder="Password" required>
+            <button id="login-button" type="button" class="submit-button">Login</button>
+        </form>
+        <form id="register" class="input-group">
+            <input id="registration-email" type="text" class="input-field" placeholder="Enter Your Email ID!" required>
+            <input id="registration-stockname" type="text" class="input-field"
+                   placeholder="Enter the stock you want to track" required>
+            <input id="registration-stockvalue" type="text" class="input-field"
+                   placeholder="Enter your target stock value" required>
+            <input id="registration-password" type="text" class="input-field" placeholder="Password" required>
+            <button id="registration-button" type="submit" class="submit-button">Register</button>
+        </form>
+    </div>
+</div>
 
-        <script>
-            var x = document.getElementById("login");
-            var y = document.getElementById("register");
-            var z = document.getElementById("btn");
 
-            function register(){
-                x.style.left = "-400px";
-                y.style.left = "50px";
-                z.style.left = "110px";  
+<script>
+    $("#login-button").click(function () {
+        console.log('clicked');
+        $.ajax({
+            type: 'GET',
+            crossDomain: true,
+            dataType: 'jsonp',
+            url: 'http://localhost:5000/',
+            success: function (jsondata) {
+                console.log(jsondata);
+                // window.location.href = jsondata['url'];
             }
+        })
+    });
+</script>
+<script>
+    var x = document.getElementById("login");
+    var y = document.getElementById("register");
+    var z = document.getElementById("btn");
 
-            function login(){
-                x.style.left = "50px";
-                y.style.left = "450px";
-                z.style.left = "0px";
-            }
-        </script>
-    </body>
+    function register() {
+        x.style.left = "-400px";
+        y.style.left = "50px";
+        z.style.left = "110px";
+    }
+
+    function login() {
+        x.style.left = "50px";
+        y.style.left = "450px";
+        z.style.left = "0px";
+    }
+</script>
+</body>
 </html>

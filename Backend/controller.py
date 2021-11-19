@@ -1,9 +1,10 @@
 from os.path import join, dirname
 
-from flask import Flask, request, Response
+import requests
+from flask import Flask, request, Response, render_template
 from flaskext.mysql import MySQL
 
-from SnsWrapper import subscribe
+# from SnsWrapper import subscribe
 import os
 import boto3
 from dotenv import load_dotenv, find_dotenv
@@ -11,6 +12,7 @@ from dotenv import load_dotenv, find_dotenv
 app = Flask(__name__)
 
 dotenv_path = join(dirname(__file__), '.env')
+frontend_path = join(dirname(__file__), 'Frontend', 'postlogin.html')
 load_dotenv(dotenv_path)
 load_dotenv(find_dotenv())
 client = boto3.client("cognito-idp", region_name=os.getenv("region_name"))
@@ -25,17 +27,21 @@ conn = mysql.connect()
 cursor = conn.cursor()
 
 
-@app.route('/')
+@app.route('/test')
 def hello_world():
-    response = subscribe("arn:aws:sns:us-east-2:229956378987:cs218projectnotification", "email", "myemail@host")
-    return 'Hello World!'
+    # response = subscribe("arn:aws:sns:us-east-2:229956378987:cs218projectnotification", "email", "myemail@host")
+    jsondata = {}
+    jsondata["url"] = 'file:///C:/Users/Archit/PycharmProjects/cs218/Frontend/postlogin.html'
+    return Response(jsondata, status=200)
 
 
-@app.route('/login')
+@app.route('/login', methods=['POST'])
 def login():
-    req = request.get_json()
-    username = req['username']
-    password = req['password']
+    # req = request.form
+    print(request.form['username'])
+    # print(req)
+    username = request.form['username']
+    password = request.form['password']
     try:
         response = client.initiate_auth(
             ClientId=os.getenv("COGNITO_USER_CLIENT_ID"),
@@ -52,7 +58,7 @@ def login():
         return Response("Invalid Password", status=409, mimetype='application/json')
 
 
-@app.route('/register', methods=['POST'])
+@app.route('/getStocks', methods=['POST'])
 def register():
     req = request.get_json()
     stockNames = req['stockNames']
@@ -60,15 +66,9 @@ def register():
     cutOffLow = req['cutOffLow']
     cutOffHigh = req['cutOffHigh']
     username = req['username']
-    password = req['password']
 
     try:
-        response = client.sign_up(
-            ClientId=os.getenv("COGNITO_USER_CLIENT_ID"),
-            Username=username,
-            Password=password,
-            UserAttributes=[{"Name": "email", "Value": username}],
-        )
+
         for i, j in enumerate(stockNames):
             print(id, stockNames[i], stockBuyPrices[i], cutOffLow[i], cutOffHigh[i])
             cursor.execute("insert into stock values (%s, %s, %s, %s, %s);",
@@ -95,6 +95,32 @@ def confirmCode():
     except Exception as e:
         print(e)
         return Response(status=500, mimetype='application/json')
+
+
+@app.route('/stocks')
+def getUser():
+    client_id = os.getenv("COGNITO_USER_CLIENT_ID")
+    client_secret = os.getenv("client_secret")
+    callback_uri = os.getenv("callback_uri")
+    cognito_app_url = os.getenv("cognito_app_url")
+    code = request.args.get('code')
+    token_url = f"{cognito_app_url}/oauth2/token"
+    auth = requests.auth.HTTPBasicAuth(client_id, client_secret)
+
+    params = {
+        "grant_type": "authorization_code",
+        "client_id": client_id,
+        "code": code,
+        "redirect_uri": callback_uri
+    }
+
+    response = requests.post(token_url, auth=auth, data=params)
+    response = response.json()
+    access_token = response["access_token"]
+    response = client.get_user(AccessToken=access_token)
+    username = response["Username"]
+    return Response(username, status=200, mimetype='application/json')
+
 
 
 if __name__ == '__main__':
