@@ -12,24 +12,45 @@ class App extends Component{
   state = {
     user: "",
     message: "",
+    stockDetails: {
+      user: "",
+      stockNames: "",
+      stockBuyPrices: "",
+      cutOffLow: "",
+      cutOffHigh: ""
+    }
   }
 
-  
-  constructor(){
-    super();
+  componentDidMount() {
     let search = window.location.search;
     let params = new URLSearchParams(search);
     let code = params.get('code');
     console.log(code);
+    console.log('constructor called');
     api.post('/', {'code': code}).then(res =>{
       if(res.status === 200){
         this.setState({ user: res.data});
+        console.log(this.state.user);
       }
     })
+ }
+  
+  constructor(){
+    super();
+    
   }
 
   submitStocks = async() => {
-  let res = await api.post('/stocks', { /* TODO */ });
+    
+    var stockNames= document.getElementById("ddlStocks").value;
+    var stockBuyPrices = document.getElementById("txtPrice").value;
+    var cutOffLow = document.getElementById("txtLow").value;
+    var cutOffHigh = document.getElementById("txtHigh").value;
+    var username = this.state.user;
+    console.log(username);
+
+    console.log("Stock selected: " + stockNames + " and Price is " + stockBuyPrices + "Low : " + cutOffLow + "high : " + cutOffHigh);
+    let res = await api.post('/stocks', {username, stockNames, stockBuyPrices, cutOffLow, cutOffHigh});
     if(res.status === 201){
       this.setState({message: "Submitted!"})
     }
@@ -44,7 +65,7 @@ class App extends Component{
       <body>
 
         <head>
-          <title>Change Values</title>
+          <title>Stock Notification Application</title>
 
         </head>
 
@@ -56,8 +77,9 @@ class App extends Component{
               <h1 id="welcome">Welcome Back!</h1>
             </div>
             <div>
+              
               <label for="Stocks">Choose a Stock:</label>
-              <select name="stocks" id="stock name">
+              <select name="stocks" id="ddlStocks">
                 <option value="CME">CME</option>
                 <option value="CBOT">CBOT</option>
                 <option value="NY Mercantile">NY Mercantile</option>
@@ -74,11 +96,11 @@ class App extends Component{
 
             </div>
             <form >
-              Price : <input  type="text" id="Price" name="price" />
+              Price : <input  type="text" id="txtPrice" name="price" />
               <br></br>
-              Lower Cutoff : <input  type="text" id="Lower" name="Lower" />
+              Lower Cutoff : <input  type="text" id="txtLow" name="Lower" />
               <br></br>
-              Higher Cutoff : <input  type="text" id="High" name="High" />
+              Higher Cutoff : <input  type="text" id="txtHigh" name="High" />
               <br></br>
                <input type="button" onClick={this.submitStocks} value="Submit"/>
             </form>
@@ -99,4 +121,3 @@ class App extends Component{
 }
 
 export default App;
-

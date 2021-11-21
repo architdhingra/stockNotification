@@ -76,18 +76,19 @@ def register():
     try:
 
         req = request.get_json()
+        print(req)
         stockNames = req['stockNames']
         stockBuyPrices = req['stockBuyPrices']
         cutOffLow = req['cutOffLow']
         cutOffHigh = req['cutOffHigh']
         username = req['username']
-        cursor.execute("insert into stocks values (%s, %s, %s, %s, %s, %s);",
-                       (username, stockNames, stockBuyPrices, cutOffLow, cutOffHigh, datetime.now()))
+        cursor.execute("insert into stocks (user, name, price, cutOffLow, cutOffHigh, timestamp) values (%s, %s, %s, %s, %s, %s);",
+                       (username, stockNames, stockBuyPrices, cutOffLow, cutOffHigh, datetime.datetime.now()))
         conn.commit()
         return Response(status=201, mimetype='application/json')
     except Exception as e:
         print(e)
-        return Response(status=409, mimetype='application/json')
+    #     return Response(status=409, mimetype='application/json')
 
 
 @app.route('/confirmCode', methods=['POST'])
@@ -128,9 +129,12 @@ def getUser():
 
         response = requests.post(token_url, auth=auth, data=params)
         response = response.json()
+        print(response)
         access_token = response["access_token"]
         response = client.get_user(AccessToken=access_token)
+        print(response)
         username = response["Username"]
+        print(username)
         return Response(username, status=200, mimetype='application/json')
     except Exception as e:
         print(e)
