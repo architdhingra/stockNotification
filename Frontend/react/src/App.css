@@ -1,0 +1,124 @@
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+.firstdiv {
+  height: 100%;
+  width: 100%;
+  
+}
+
+.form-box {
+  width: 380px;
+  height: 350px;
+  top: 80px;
+  position: relative;
+  margin: 6% auto;
+  background: #fff;
+  padding: 5px;
+  overflow: hidden;
+}
+
+.button-box {
+  width: 220px;
+  margin: 35px auto;
+  position: relative;
+  box-shadow: 0 0 20px 9px #0243f74b;
+  border-radius: 30px;
+}
+
+.toggle-button {
+  padding: 10px 30px;
+  cursor: pointer;
+  background: transparent;
+  border: 0;
+  outline: none;
+  position: relative;
+}
+
+#btn {
+  top: 0;
+  left: 0;
+  position: absolute;
+  width: 110px;
+  height: 100%;
+  background: linear-gradient(to right, #3b44fc, #52f0fa);
+  border-radius: 30px;
+  transition: 0.5s;
+}
+
+.input-group {
+  top: 100px;
+  position: absolute;
+  width: 280px;
+  transition: 0.5s;
+}
+
+.input-field {
+  width: 100%;
+  padding: 10px 0;
+  margin: 5px 0;
+  border-left: 0;
+  border-top: 0;
+  border-right: 0;
+  border-bottom: 1px, solid, #999;
+  outline: none;
+  background: transparent;
+}
+
+.submit-button {
+  width: 85%;
+  padding: 10px 30px;
+  cursor: pointer;
+  display: block;
+  margin: 10px auto;
+  background: linear-gradient(to right, #3b44fc, #52f0fa);
+  border: 0;
+  outline: none;
+  border-radius: 30px;
+}
+
+#login {
+  left: 50px;
+  top: 130px;
+}
+
+#register {
+  left: 450px;
+}

@@ -9,8 +9,13 @@ from flaskext.mysql import MySQL
 import os
 import boto3
 from dotenv import load_dotenv, find_dotenv
+from flask_cors import CORS, cross_origin
+from Backend.SnsWrapper import subscribe
 
 app = Flask(__name__)
+
+cors = CORS(app)
+app.config['CORS_HEADERS'] = 'Content-Type'
 
 dotenv_path = join(dirname(__file__), '.env')
 frontend_path = join(dirname(__file__), 'Frontend', 'postlogin.html')
@@ -28,12 +33,19 @@ conn = mysql.connect()
 cursor = conn.cursor()
 
 
-@app.route('/test')
-def hello_world():
-    # response = subscribe("arn:aws:sns:us-east-2:229956378987:cs218projectnotification", "email", "myemail@host")
-    jsondata = {}
-    jsondata["url"] = 'file:///C:/Users/Archit/PycharmProjects/cs218/Frontend/postlogin.html'
-    return Response(jsondata, status=200)
+@app.route('/test', methods=['POST'])
+@cross_origin()
+def test():
+    dic = {}
+    dic["ke"] = "value"
+    return Response(dic, status=200, mimetype='application/json')
+
+
+def subscribeToSNS(user):
+    try:
+        response = subscribe(os.getenv("topic"), "email", user)
+    except Exception as e:
+        print(e)
 
 
 @app.route('/login', methods=['POST'])
@@ -59,21 +71,18 @@ def login():
         return Response("Invalid Password", status=409, mimetype='application/json')
 
 
-@app.route('/getStocks', methods=['POST'])
+@app.route('/stocks', methods=['POST'])
 def register():
-    req = request.get_json()
-    stockNames = req['stockNames']
-    stockBuyPrices = req['stockBuyPrices']
-    cutOffLow = req['cutOffLow']
-    cutOffHigh = req['cutOffHigh']
-    username = req['username']
-
     try:
 
-        for i, j in enumerate(stockNames):
-            print(id, stockNames[i], stockBuyPrices[i], cutOffLow[i], cutOffHigh[i])
-            cursor.execute("insert into stock values (%s, %s, %s, %s, %s, %s);",
-                           (username, stockNames[i], stockBuyPrices[i], cutOffLow[i], cutOffHigh[i], datetime.now()))
+        req = request.get_json()
+        stockNames = req['stockNames']
+        stockBuyPrices = req['stockBuyPrices']
+        cutOffLow = req['cutOffLow']
+        cutOffHigh = req['cutOffHigh']
+        username = req['username']
+        cursor.execute("insert into stocks values (%s, %s, %s, %s, %s, %s);",
+                       (username, stockNames, stockBuyPrices, cutOffLow, cutOffHigh, datetime.now()))
         conn.commit()
         return Response(status=201, mimetype='application/json')
     except Exception as e:
@@ -86,6 +95,7 @@ def confirmCode():
     req = request.get_json()
     confirm_code = req['confirm_code']
     username = req['username']
+    subscribeToSNS(username)
     try:
         response = client.confirm_sign_up(
             ClientId=os.getenv("COGNITO_USER_CLIENT_ID"),
@@ -98,30 +108,33 @@ def confirmCode():
         return Response(status=500, mimetype='application/json')
 
 
-@app.route('/stocks')
+@app.route('/', methods=['POST'])
 def getUser():
     client_id = os.getenv("COGNITO_USER_CLIENT_ID")
     client_secret = os.getenv("client_secret")
     callback_uri = os.getenv("callback_uri")
     cognito_app_url = os.getenv("cognito_app_url")
-    code = request.args.get('code')
+    code = request.get_json()['code']
     token_url = f"{cognito_app_url}/oauth2/token"
-    auth = requests.auth.HTTPBasicAuth(client_id, client_secret)
+    try:
+        auth = requests.auth.HTTPBasicAuth(client_id, client_secret)
 
-    params = {
-        "grant_type": "authorization_code",
-        "client_id": client_id,
-        "code": code,
-        "redirect_uri": callback_uri
-    }
+        params = {
+            "grant_type": "authorization_code",
+            "client_id": client_id,
+            "code": code,
+            "redirect_uri": callback_uri
+        }
 
-    response = requests.post(token_url, auth=auth, data=params)
-    response = response.json()
-    access_token = response["access_token"]
-    response = client.get_user(AccessToken=access_token)
-    username = response["Username"]
-    return Response(username, status=200, mimetype='application/json')
-
+        response = requests.post(token_url, auth=auth, data=params)
+        response = response.json()
+        access_token = response["access_token"]
+        response = client.get_user(AccessToken=access_token)
+        username = response["Username"]
+        return Response(username, status=200, mimetype='application/json')
+    except Exception as e:
+        print(e)
+        return Response(status=400, mimetype='application/json')
 
 
 if __name__ == '__main__':
