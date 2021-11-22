@@ -96,13 +96,20 @@ class App extends Component{
 
             </div>
             <form >
-              Price : <input  type="text" id="txtPrice" name="price" />
+              <p>
+              Stock Buy Price : <input  type="text" id="txtPrice" name="price" />
               <br></br>
+              </p>
+              <p>
               Lower Cutoff : <input  type="text" id="txtLow" name="Lower" />
               <br></br>
+              </p>
               Higher Cutoff : <input  type="text" id="txtHigh" name="High" />
               <br></br>
-               <input type="button" onClick={this.submitStocks} value="Submit"/>
+
+              <p>
+               <input class="submit-button" type="button" onClick={this.submitStocks} value="Submit"/>
+               </p>
             </form>
 
           {this.state.message}

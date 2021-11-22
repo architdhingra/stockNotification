@@ -12,7 +12,7 @@ from dotenv import load_dotenv, find_dotenv
 
 app = Flask(__name__)
 
-dotenv_path = join(dirname(__file__), '.env')
+dotenv_path = join(dirname(__file__), 'env.cfg')
 frontend_path = join(dirname(__file__), 'Frontend', 'postlogin.html')
 load_dotenv(dotenv_path)
 load_dotenv(find_dotenv())
