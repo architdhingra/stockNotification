@@ -19,11 +19,10 @@ config.read(initfile)
 
 details_dict = dict(config.items('SECTION_NAME'))
 
-app = Flask(__name__)
+application = Flask(__name__)
 
-
-cors = CORS(app)
-app.config['CORS_HEADERS'] = 'Content-Type'
+cors = CORS(application)
+application.config['CORS_HEADERS'] = 'Content-Type'
 
 dotenv_path = join(dirname(__file__), 'env.cfg')
 load_dotenv(dotenv_path)
@@ -32,16 +31,16 @@ print(details_dict)
 client = boto3.client("cognito-idp", region_name=details_dict['region_name'])
 
 mysql = MySQL()
-app.config['MYSQL_DATABASE_USER'] = details_dict['mysql_database_user']
-app.config['MYSQL_DATABASE_PASSWORD'] = details_dict['mysql_database_password']
-app.config['MYSQL_DATABASE_DB'] = details_dict['mysql_database_db']
-app.config['MYSQL_DATABASE_HOST'] = details_dict['mysql_database_host']
-mysql.init_app(app)
+application.config['MYSQL_DATABASE_USER'] = details_dict['mysql_database_user']
+application.config['MYSQL_DATABASE_PASSWORD'] = details_dict['mysql_database_password']
+application.config['MYSQL_DATABASE_DB'] = details_dict['mysql_database_db']
+application.config['MYSQL_DATABASE_HOST'] = details_dict['mysql_database_host']
+mysql.init_app(application)
 conn = mysql.connect()
 cursor = conn.cursor()
 
 
-@app.route('/test', methods=['POST'])
+@application.route('/test', methods=['POST'])
 @cross_origin()
 def test():
     dic = {}
@@ -56,7 +55,7 @@ def subscribeToSNS(user):
         print(e)
 
 
-@app.route('/stocks', methods=['POST'])
+@application.route('/stocks', methods=['POST'])
 @cross_origin()
 def register():
     try:
@@ -78,11 +77,12 @@ def register():
         return Response(status=409, mimetype='application/json')
 
 
-@app.route('/')
+@application.route('/')
 def nothing():
     return 'Working!'
 
-@app.route('/', methods=['POST'])
+
+@application.route('/', methods=['POST'])
 @cross_origin()
 def getUser():
     client_id = details_dict['cognito_user_client_id']
@@ -143,4 +143,4 @@ def subscribe(topic, protocol, endpoint):
 
 
 if __name__ == '__main__':
-    app.run(host='localhost', port=8080, debug=True)
+    application.run(ssl_context='adhoc', host='localhost', port=8080, debug=True)

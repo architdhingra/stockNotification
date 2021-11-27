@@ -1,28 +1,31 @@
+import os
 import ssl
 
+import configparser
 import requests
 from os.path import join, dirname
 import smtplib
 from flask import Flask
 from flaskext.mysql import MySQL
 from datetime import datetime, timedelta
-import os
 import boto3
-from dotenv import load_dotenv, find_dotenv
 
 app = Flask(__name__)
 
-dotenv_path = join(dirname(__file__), 'env.cfg')
-frontend_path = join(dirname(__file__), 'Frontend', 'postlogin.html')
-load_dotenv(dotenv_path)
-load_dotenv(find_dotenv())
-client = boto3.client("cognito-idp", region_name=os.getenv("region_name"))
+
+config = configparser.RawConfigParser()
+thisfolder = os.path.dirname(os.path.abspath(__file__))
+initfile = os.path.join(thisfolder, 'env.cfg')
+config.read(initfile)
+
+details_dict = dict(config.items('SECTION_NAME'))
+client = boto3.client("cognito-idp", region_name=details_dict['region_name'])
 
 mysql = MySQL()
-app.config['MYSQL_DATABASE_USER'] = os.getenv("MYSQL_DATABASE_USER")
-app.config['MYSQL_DATABASE_PASSWORD'] = os.getenv("MYSQL_DATABASE_PASSWORD")
-app.config['MYSQL_DATABASE_DB'] = os.getenv("MYSQL_DATABASE_DB")
-app.config['MYSQL_DATABASE_HOST'] = os.getenv("MYSQL_DATABASE_HOST")
+app.config['MYSQL_DATABASE_USER'] = details_dict['mysql_database_user']
+app.config['MYSQL_DATABASE_PASSWORD'] = details_dict['mysql_database_password']
+app.config['MYSQL_DATABASE_DB'] = details_dict['mysql_database_db']
+app.config['MYSQL_DATABASE_HOST'] = details_dict['mysql_database_host']
 mysql.init_app(app)
 conn = mysql.connect()
 cursor = conn.cursor()
@@ -47,16 +50,17 @@ def sendEmail(cutOffLow, cutOffHigh, stockName, stockPrice, user):
 
 def getAllStocks():
     resp = requests.get("https://yfapi.net/v6/finance/quote/marketSummary",
-                        headers={"x-api-key": os.getenv("x-api-key")})
+                        headers={"x-api-key": details_dict['x-api-key']})
     stocks = resp.json()["marketSummaryResponse"]["result"]
     stockDict = {}
     for stock in stocks:
         stockDict[stock["fullExchangeName"]] = stock["regularMarketPrice"]["raw"]
-
+    print('running get all stocks')
     now = datetime.now()
     five = timedelta(minutes=5)
     cursor.execute("select * from stocks where timestamp < %s;", (now - five))
     myresult = cursor.fetchall()
+    print('verifying all stocks')
     for result in myresult:
         userStockName = result[1]
         cutOffLow = float(result[3])

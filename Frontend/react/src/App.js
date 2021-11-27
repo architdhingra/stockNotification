@@ -46,12 +46,17 @@ class App extends Component{
     var stockBuyPrices = document.getElementById("txtPrice").value;
     var cutOffLow = document.getElementById("txtLow").value;
     var cutOffHigh = document.getElementById("txtHigh").value;
+
     var username = this.state.user;
     console.log(username);
 
     console.log("Stock selected: " + stockNames + " and Price is " + stockBuyPrices + "Low : " + cutOffLow + "high : " + cutOffHigh);
     let res = await api.post('/stocks', {username, stockNames, stockBuyPrices, cutOffLow, cutOffHigh});
     if(res.status === 201){
+      alert('Submitted');
+      document.getElementById("txtPrice").value  = "";
+      document.getElementById("txtLow").value  = "";
+      document.getElementById("txtHigh").value = "";
       this.setState({message: "Submitted!"})
     }
     else{
@@ -113,6 +118,8 @@ class App extends Component{
             </form>
 
           {this.state.message}
+
+
 
 
 
